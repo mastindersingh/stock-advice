@@ -86,7 +86,6 @@ def index():
     stock_data = fetch_stock_data(read_stock_purchases())
     return render_template('stocks.html', stock_data=stock_data)
 
-# The below line is not needed for Vercel deployment
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
 

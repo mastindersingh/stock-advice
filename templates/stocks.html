@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Data</title>
+</head>
+<body>
+    <h1>Stock Data</h1>
+
+    <form action="/" method="post">
+        <label for="ticker">Ticker:</label>
+        <input type="text" id="ticker" name="ticker" required><br><br>
+
+        <label for="buy_date">Buy Date:</label>
+        <input type="date" id="buy_date" name="buy_date" required><br><br>
+
+        <label for="buy_price">Buy Price:</label>
+        <input type="number" id="buy_price" name="buy_price" step="0.01" required><br><br>
+
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required><br><br>
+
+        <input type="submit" value="Add Stock">
+    </form>
+
+    <hr>
+
+    {% for ticker, data in stock_data.items() %}
+        <h2>{{ ticker }}</h2>
+        <p>Buy Date: {{ data.buy_date }}</p>
+        <p>Buy Price: {{ data.buy_price }}</p>
+        <p>Quantity: {{ data.quantity }}</p>
+        <p>Current Price: {{ data.current_price }}</p>
+        <p>Performance: {{ data.performance }}</p>
+        <p>Percentage Change: {{ data.percentage_change }}%</p>
+        <div>
+            <img src="data:image/png;base64,{{ data.graph }}" alt="Stock graph for {{ ticker }}">
+        </div>
+    {% endfor %}
+</body>
+</html>
+

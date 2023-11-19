@@ -1,0 +1,125 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import yfinance as yf
+import pandas as pd
+from datetime import datetime
+import base64
+from io import BytesIO
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Replace with a real secret key
+
+# Dummy login data
+allowed_users = {
+    'mastinder@yahoo.com': 'password123'  # Replace with real password
+}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if email in allowed_users and allowed_users[email] == password:
+            session['email'] = email
+            return redirect(url_for('index'))
+        else:
+            return 'Login Failed!'
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    return redirect(url_for('login'))
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        ticker = request.form.get('ticker')
+        buy_date = request.form.get('buy_date')
+        buy_price = request.form.get('buy_price')
+        quantity = request.form.get('quantity')
+
+        new_data = pd.DataFrame([[ticker, buy_date, buy_price, quantity]], columns=['Ticker', 'BuyDate', 'BuyPrice', 'Quantity'])
+        write_stock_purchases(new_data)
+
+        return redirect(url_for('index'))
+
+    stock_data = fetch_stock_data(read_stock_purchases())
+    return render_template('stocks.html', stock_data=stock_data)
+
+@app.route('/subscribe')
+def subscribe():
+    return render_template('subscribe.html')
+
+def read_stock_purchases():
+    try:
+        return pd.read_csv('stock_purchases.csv')
+    except FileNotFoundError:
+        return pd.DataFrame(columns=['Ticker', 'BuyDate', 'BuyPrice', 'Quantity'])
+
+def write_stock_purchases(new_data):
+    try:
+        existing_data = pd.read_csv('stock_purchases.csv')
+        combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+        combined_data.to_csv('stock_purchases.csv', index=False)
+    except FileNotFoundError:
+        new_data.to_csv('stock_purchases.csv', index=False)
+
+def fetch_stock_data(stock_purchases):
+    stock_data = {}
+    end_date = datetime.now()
+
+    grouped = stock_purchases.groupby('Ticker')
+    for ticker, group in grouped:
+        total_quantity = group['Quantity'].sum()
+        weighted_avg_price = (group['BuyPrice'] * group['Quantity']).sum() / total_quantity
+        earliest_buy_date = group['BuyDate'].min()
+
+        try:
+            tickerData = yf.Ticker(ticker)
+            data = tickerData.history(period="max")
+            current_price = data['Close'].iloc[-1]
+            percentage_change = ((current_price - weighted_avg_price) / weighted_avg_price) * 100
+            performance = "Up" if current_price > weighted_avg_price else "Down"
+
+            plt.figure(figsize=(10, 4))
+            plt.plot(data['Close'])
+            plt.title(f"{ticker} Stock Price")
+            plt.xlabel("Date")
+            plt.ylabel("Price")
+            graph = get_graph()
+
+            stock_data[ticker] = {
+                'data': data,
+                'earliest_buy_date': earliest_buy_date,
+                'weighted_avg_price': weighted_avg_price,
+                'total_quantity': total_quantity,
+                'current_price': current_price,
+                'performance': performance,
+                'percentage_change': percentage_change,
+                'graph': graph
+            }
+        except Exception as e:
+            print(f"Error fetching data for {ticker}: {e}")
+
+    return stock_data
+
+def get_graph():
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    graph = base64.b64encode(image_png)
+    graph = graph.decode('utf-8')
+    buffer.close()
+    return graph
+
+if __name__ == '__main__':
+    app.run(debug=True)
+

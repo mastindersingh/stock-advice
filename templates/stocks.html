@@ -26,9 +26,9 @@
 
     {% for ticker, data in stock_data.items() %}
         <h2>{{ ticker }}</h2>
-        <p>Buy Date: {{ data.buy_date }}</p>
-        <p>Buy Price: {{ data.buy_price }}</p>
-        <p>Quantity: {{ data.quantity }}</p>
+        <p>Earliest Buy Date: {{ data.earliest_buy_date }}</p>
+        <p>Weighted Average Buy Price: {{ data.weighted_avg_price }}</p>
+        <p>Total Quantity: {{ data.total_quantity }}</p>
         <p>Current Price: {{ data.current_price }}</p>
         <p>Performance: {{ data.performance }}</p>
         <p>Percentage Change: {{ data.percentage_change }}%</p>

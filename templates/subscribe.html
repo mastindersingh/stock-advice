@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subscribe</title>
+</head>
+<body>
+    <h1>Subscribe to Access Premium Content</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form action="/subscribe" method="post">
+        <input type="text" name="subscription_code" placeholder="Enter Subscription Code" required>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+

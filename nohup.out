@@ -1,0 +1,21 @@
+ * Serving Flask app "app9" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 143-555-974
+Traceback (most recent call last):
+  File "/Users/taran/stock-advice/app9.py", line 155, in <module>
+    app.run(debug=True)
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 990, in run
+    run_simple(host, port, self, **options)
+  File "/usr/local/lib/python3.11/site-packages/werkzeug/serving.py", line 1010, in run_simple
+    run_with_reloader(inner, extra_files, reloader_interval, reloader_type)
+  File "/usr/local/lib/python3.11/site-packages/werkzeug/_reloader.py", line 333, in run_with_reloader
+    ensure_echo_on()
+  File "/usr/local/lib/python3.11/site-packages/werkzeug/_reloader.py", line 322, in ensure_echo_on
+    termios.tcsetattr(sys.stdin, termios.TCSANOW, attributes)
+termios.error: (4, 'Interrupted system call')

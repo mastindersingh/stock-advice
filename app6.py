@@ -10,7 +10,7 @@ import base64
 from io import BytesIO
 
 app = Flask(__name__)
-app.secret_key = 'bApG1HXBfOeC5JhRj_tvKA'  # Replace with your real secret key
+app.secret_key = 'your_secret_key'  # Replace with a real secret key
 
 # Google OAuth Setup
 oauth = OAuth(app)
@@ -26,11 +26,21 @@ google = oauth.remote_app(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
 
+# Dummy login data for manual login
+allowed_users = {
+    'mastinder@yahoo.com': 'password123'  # Replace with real user data
+}
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Manual login logic (if you have one)
-        pass
+        email = request.form.get('email')
+        password = request.form.get('password')
+        if email in allowed_users and allowed_users[email] == password:
+            session['email'] = email
+            return redirect(url_for('index'))
+        else:
+            return 'Login Failed!'
     return render_template('login.html')
 
 @app.route('/google-login')
@@ -41,7 +51,6 @@ def google_login():
 def logout():
     session.pop('google_token', None)
     session.pop('email', None)
-    session.pop('subscribed', None)
     return redirect(url_for('login'))
 
 @app.route('/login/authorized')
@@ -55,11 +64,20 @@ def authorized():
     session['google_token'] = (resp['access_token'], '')
     user_info = google.get('userinfo')
     session['email'] = user_info.data['email']
-    return redirect(url_for('subscribe'))
+    return redirect(url_for('index'))
 
 @google.tokengetter
 def get_google_oauth_token():
     return session.get('google_token')
+
+@app.route('/')
+def index():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+    if not session.get('subscribed', False):
+        return redirect(url_for('subscribe'))
+    # Add your main page logic here
+    return render_template('index.html')
 
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
@@ -79,22 +97,24 @@ def check_subscription_code(code):
     except FileNotFoundError:
         return False
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if 'email' not in session:
-        return redirect(url_for('login'))
 
-    # Check if the user is subscribed
-    if not session.get('subscribed', True):
-        return redirect(url_for('subscribe'))
-
-    # If the user is subscribed, display the stock data
     if request.method == 'POST':
-        # Your existing POST request handling code
-        pass
+        ticker = request.form.get('ticker')
+        buy_date = request.form.get('buy_date')
+        buy_price = request.form.get('buy_price')
+        quantity = request.form.get('quantity')
+
+        new_data = pd.DataFrame([[ticker, buy_date, buy_price, quantity]], columns=['Ticker', 'BuyDate', 'BuyPrice', 'Quantity'])
+        write_stock_purchases(new_data)
+
+        return redirect(url_for('index'))
 
     stock_data = fetch_stock_data(read_stock_purchases())
     return render_template('stocks.html', stock_data=stock_data)
+
+@app.route('/subscribe')
+def subscribe():
+    return render_template('subscribe.html')
 
 def read_stock_purchases():
     try:
@@ -130,7 +150,6 @@ def fetch_stock_data(stock_purchases):
 
         stock_data[ticker] = {
             'data': data,
-            'earliest_buy_date': group['BuyDate'].min(),
             'weighted_avg_price': weighted_avg_price,
             'total_quantity': total_quantity,
             'current_price': current_price,

@@ -181,7 +181,4 @@ def test_check_subscription_code():
     result = check_subscription_code(test_code)
     print(f"Test Code: {test_code}, Result: {result}")
 
-if __name__ == '__main__':
-    test_check_subscription_code()  # Test function call
-    app.run(debug=True)
 

@@ -2,16 +2,69 @@
 <html>
 <head>
     <title>Subscribe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Subscribe to Access Premium Content</h1>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <form action="/subscribe" method="post">
-        <input type="text" name="subscription_code" placeholder="Enter Subscription Code" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="container">
+        <h1>Subscribe to Access Premium Content</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form action="/subscribe" method="post">
+            <input type="text" name="subscription_code" placeholder="Enter Subscription Code" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 </body>
 </html>
 
